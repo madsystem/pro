@@ -56,21 +56,21 @@ local exec   = function (s) oldspawn(s, false) end
 local shexec = awful.util.spawn_with_shell
 
 modkey        = "Mod4"
-terminal      = "termite"
+terminal      = "terminator"
 tmux          = "termite -e tmux"
 termax        = "termite --geometry 1680x1034+0+22"
-rootterm      = "sudo -i termite"
+rootterm      = "sudo -i terminator"
 browser       = "firefox"
-filemanager   = "spacefm"
+filemanager   = "terminator -e ranger"
 configuration = termax .. ' -e "vim -O $HOME/.config/awesome/rc.lua $HOME/.config/awesome/themes/' ..theme.. '/theme.lua"'
 
 -- | Table of layouts | --
 
 local layouts =
 {
-    awful.layout.suit.floating,
     awful.layout.suit.tile,
     awful.layout.suit.tile.left,
+    awful.layout.suit.floating,
     awful.layout.suit.tile.bottom,
     awful.layout.suit.tile.top
 }
@@ -79,8 +79,8 @@ local layouts =
 
 if beautiful.wallpaper then
     for s = 1, screen.count() do
-        gears.wallpaper.tiled(beautiful.wallpaper, s)
-        -- gears.wallpaper.maximized(beautiful.wallpaper, s, true)
+        -- gears.wallpaper.tiled(beautiful.wallpaper, s)
+        gears.wallpaper.maximized(beautiful.wallpaper, s, true)
     end
 end
 
@@ -101,10 +101,11 @@ menu_main = {
   { "quit",      awesome.quit        }}
 
 mainmenu = awful.menu({ items = {
-  { " awesome",       menu_main   },
-  { " file manager",  filemanager },
-  { " root terminal", rootterm    },
-  { " user terminal", terminal    }}})
+  { "awesome",       menu_main   },
+  { "file manager",  filemanager },
+  { "browser",       browser },
+  { "root terminal", rootterm    },
+  { "user terminal", terminal    }}})
 
 -- | Markup | --
 
@@ -271,7 +272,7 @@ fswidget:set_bgimage(beautiful.widget_display)
 
 net_widgetdl = wibox.widget.textbox()
 net_widgetul = lain.widgets.net({
-    iface = "eth0",
+    iface = "enp5s0",
     settings = function()
         widget:set_markup(markup.font("Tamsyn 1", "  ") .. net_now.sent)
         net_widgetdl:set_markup(markup.font("Tamsyn 1", " ") .. net_now.received .. markup.font("Tamsyn 1", " "))
@@ -389,13 +390,16 @@ for s = 1, screen.count() do
     left_layout:add(spr5px)
 
     local right_layout = wibox.layout.fixed.horizontal()
-    if s == 1 then
-        right_layout:add(spr)
-        right_layout:add(spr5px)
-        right_layout:add(mypromptbox[s])
-        right_layout:add(wibox.widget.systray())
-        right_layout:add(spr5px)
-    end
+    
+    right_layout:add(spr)
+    right_layout:add(spr5px)
+    right_layout:add(mypromptbox[s])
+    
+    -- fixme: this is ther reason why pidgin flickers
+    -- fixed: only show this on one screen or else icons will flicker 
+    if s == 1 then right_layout:add(wibox.widget.systray()) end
+    
+    right_layout:add(spr5px)
 
     right_layout:add(spr)
 
@@ -487,8 +491,6 @@ root.buttons(awful.util.table.join(
 ))
 
 -- | Key bindings | --
-
-
 globalkeys = awful.util.table.join(
 
     awful.key({ modkey,           }, "w",      function () mainmenu:show() end),
@@ -503,6 +505,9 @@ globalkeys = awful.util.table.join(
             awful.client.focus.byidx(-1)
             if client.focus then client.focus:raise() end
         end),
+    -- Screen jumping
+    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end),
+    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
     -- awful.key({ modkey,           }, "Tab",
     --     function ()
     --         awful.client.focus.history.previous()
@@ -516,10 +521,10 @@ globalkeys = awful.util.table.join(
     -- awful.key({ modkey, "Shift" }, "Tab", function(c)
     --         cyclefocus.cycle(-1, {modifier="Super_L"})
     -- end),
-    cyclefocus.key({ "Mod1", }, "Tab", 1, {
-        cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
-        keys = {'Tab', 'ISO_Left_Tab'}
-    }),
+    -- cyclefocus.key({ "Mod1", }, "Tab", 1, {
+    --     cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
+    --     keys = {'Tab', 'ISO_Left_Tab'}
+    -- }),
     awful.key({ modkey, "Control" }, "r",      awesome.restart),
     awful.key({ modkey, "Shift"   }, "q",      awesome.quit),
     awful.key({ modkey,           }, "Return", function () exec(terminal) end),
@@ -535,12 +540,14 @@ wh = wa.height
 ph = 22 -- (panel height)
 
 clientkeys = awful.util.table.join(
+    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end),
+    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
     awful.key({ modkey            }, "Next",     function () awful.client.moveresize( 20,  20, -40, -40) end),
     awful.key({ modkey            }, "Prior",    function () awful.client.moveresize(-20, -20,  40,  40) end),
     awful.key({ modkey            }, "Down",     function () awful.client.moveresize(  0,  20,   0,   0) end),
     awful.key({ modkey            }, "Up",       function () awful.client.moveresize(  0, -20,   0,   0) end),
-    awful.key({ modkey            }, "Left",     function () awful.client.moveresize(-20,   0,   0,   0) end),
-    awful.key({ modkey            }, "Right",    function () awful.client.moveresize( 20,   0,   0,   0) end),
+    awful.key({ modkey            }, "Left",     function () awful.client.moveresize(  0,   0,   -10,   0) end),
+    awful.key({ modkey            }, "Right",    function () awful.client.moveresize(  0,   0,    10,   0) end),
     awful.key({ modkey, "Control" }, "KP_Left",  function (c) c:geometry( { width = ww / 2, height = wh, x = 0, y = ph } ) end),
     awful.key({ modkey, "Control" }, "KP_Right", function (c) c:geometry( { width = ww / 2, height = wh, x = ww / 2, y = ph } ) end),
     awful.key({ modkey, "Control" }, "KP_Up",    function (c) c:geometry( { width = ww, height = wh / 2, x = 0, y = ph } ) end),
@@ -552,15 +559,18 @@ clientkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "KP_Begin", function (c) c:geometry( { width = ww, height = wh, x = 0, y = ph } ) end),
     awful.key({ modkey,           }, "f",        function (c) c.fullscreen = not c.fullscreen  end),
     awful.key({ modkey,           }, "c",        function (c) c:kill() end),
-    awful.key({ modkey,           }, "n",
-        function (c)
-            c.minimized = true
-        end),
-    awful.key({ modkey,           }, "m",
-        function (c)
+    awful.key({ modkey,           }, "n",        function (c) c.minimized = true end),
+    awful.key({ modkey,           }, "m",        function (c)
             c.maximized_horizontal = not c.maximized_horizontal
             c.maximized_vertical   = not c.maximized_vertical
-        end)
+        end),
+    awful.key({ modkey,           }, "o",      awful.client.movetoscreen),
+    awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end),
+    awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end),
+    awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1)      end),
+    awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end),
+    awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end),
+    awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end)
 )
 
 for i = 1, 9 do

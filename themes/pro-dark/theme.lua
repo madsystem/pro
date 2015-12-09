@@ -46,16 +46,16 @@ theme.layout_tiletop    = theme.icons .. "/panel/layouts/tiletop.png"
 
 -- | Taglist | --
 
-theme.taglist_bg_empty    = "png:" .. theme.icons .. "/panel/taglist/empty.png"
-theme.taglist_bg_occupied = "png:" .. theme.icons .. "/panel/taglist/occupied.png"
-theme.taglist_bg_urgent   = "png:" .. theme.icons .. "/panel/taglist/urgent.png"
-theme.taglist_bg_focus    = "png:" .. theme.icons .. "/panel/taglist/focus.png"
+theme.taglist_bg_empty    = "png:" .. theme.icons .. "/panel/taglist_2/empty.png"
+theme.taglist_bg_occupied = "png:" .. theme.icons .. "/panel/taglist_2/occupied.png"
+theme.taglist_bg_urgent   = "png:" .. theme.icons .. "/panel/taglist_2/urgent.png"
+theme.taglist_bg_focus    = "png:" .. theme.icons .. "/panel/taglist_2/focus.png"
 theme.taglist_font        = "Terminus 11"
 
 -- | Tasklist | --
 
 theme.tasklist_font                 = "Terminus 8"
-theme.tasklist_disable_icon         = true
+-- theme.tasklist_disable_icon         = true
 theme.tasklist_bg_normal            = "png:" .. theme.icons .. "panel/tasklist/normal.png"
 theme.tasklist_bg_focus             = "png:" .. theme.icons .. "panel/tasklist/focus.png"
 theme.tasklist_bg_urgent            = "png:" .. theme.icons .. "panel/tasklist/urgent.png"
